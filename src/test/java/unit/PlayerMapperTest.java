@@ -1,5 +1,7 @@
 package unit;
 
+import app.foot.exception.BadRequestException;
+import app.foot.exception.NotFoundException;
 import app.foot.model.Player;
 import app.foot.model.PlayerScorer;
 import app.foot.repository.MatchRepository;
@@ -8,14 +10,17 @@ import app.foot.repository.TeamRepository;
 import app.foot.repository.entity.MatchEntity;
 import app.foot.repository.entity.PlayerEntity;
 import app.foot.repository.entity.PlayerScoreEntity;
+import app.foot.repository.entity.TeamEntity;
 import app.foot.repository.mapper.PlayerMapper;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static utils.TestUtils.*;
@@ -99,5 +104,45 @@ public class PlayerMapperTest {
                 .ownGoal(false)
                 .match(matchEntity1)
                 .build(), actual);
+    }
+
+    @Test
+    void player_to_entity_ok(){
+        TeamEntity teamEntity = TeamEntity.builder()
+                .id(1)
+                .name("Barea")
+                .build();
+        when(teamRepositoryMock.findByName("Barea"))
+                .thenReturn(Optional.of(teamEntity));
+
+        PlayerEntity actual = subject
+                .toEntity(playerModelRakoto(playerEntityRakoto(teamBarea())));
+
+        assertEquals(PlayerEntity.builder()
+                .id(1)
+                .name("Rakoto")
+                .guardian(false)
+                .team(teamBarea())
+                .build(),actual);
+    }
+
+
+    @Test
+    void player_to_entity_ko(){
+        when(teamRepositoryMock.findByName("Senegal"))
+                .thenThrow(new NotFoundException("Team#Senegal not found."));
+
+        Exception exception = assertThrows(NotFoundException.class, () -> subject.toEntity(playerModelRakoto(
+                PlayerEntity.builder()
+                        .id(20)
+                        .name("Rabe")
+                        .guardian(false)
+                        .team(TeamEntity.builder()
+                                .id(5)
+                                .name("Senegal")
+                                .build())
+                        .build()
+                )));
+        assertEquals("Team#Senegal not found.", exception.getMessage().split(": ")[1]);
     }
 }
