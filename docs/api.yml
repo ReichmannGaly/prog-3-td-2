@@ -1,10 +1,63 @@
 openapi: 3.0.0
 servers:
-  - url: https://foot-api-server.com
+  - url: http://localhost:8080
 info:
   version: latest
   title: PROG3 - TD2
 paths:
+  /players:
+    get:
+      tags:
+        - Players
+      summary: Get all players
+      operationId: getPlayers
+      responses:
+        '200':
+          description: List of Players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+    post:
+      tags:
+        - Players
+      summary: Add new players
+      operationId: addPlayers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreatePlayer'
+      responses:
+        '200':
+          description: The created players
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+    put:
+      tags:
+        - Players
+      summary: Update existing players
+      operationId: updatePlayers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Player'
+      responses:
+        '200':
+          description: The updated players
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
   /matches:
     get:
       tags:
@@ -20,6 +73,25 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Match'
+  /matches/{id}:
+    get:
+      tags:
+        - Matches
+      summary: Get Match by specified id
+      parameters:
+        - name: matchId
+          in: path
+          schema:
+            type: integer
+          required: true
+      operationId: getMatchById
+      responses:
+        '200':
+          description: The match with specified id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
   /matches/{matchId}/goals:
     post:
       tags:
@@ -56,14 +128,21 @@ components:
           type: integer
         name:
           type: string
-    Player:
+    CreatePlayer:
+      type: object
       properties:
-        id:
-          type: integer
         name:
           type: string
         isGuardian:
           type: boolean
+        teamName:
+          type: string
+    Player:
+      allOf:
+        - $ref: '#/components/schemas/CreatePlayer'
+      properties:
+        id:
+          type: integer
     Match:
       type: object
       properties:
