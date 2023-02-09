@@ -49,6 +49,13 @@ class MatchIntegrationTest {
     }
 
     @Test
+    void read_matches_ko() throws Exception{
+        mockMvc
+                .perform((get("/match")))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     void read_match_by_id_ok() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(get("/matches/2"))
                 .andExpect(status().isOk())

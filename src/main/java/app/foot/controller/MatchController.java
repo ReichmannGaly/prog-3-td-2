@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-public class MatchController {
+public class MatchController extends BaseController{
     private final MatchService service;
     private final GoalValidator validator;
     private final MatchRestMapper mapper;
